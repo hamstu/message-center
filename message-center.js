@@ -32,6 +32,7 @@ MessageCenterModule.
             type: type,
             status: options.status || this.status.unseen,
             processed: false,
+            uid: "msg-" + Date.now(),
             close: function() {
               return service.remove(this);
             }
@@ -84,8 +85,8 @@ MessageCenterModule.
     /*jshint multistr: true */
     var templateString = '\
     <div id="mc-messages-wrapper">\
-      <div class="alert alert-{{ message.type }} {{ animation }}" ng-repeat="message in mcMessages">\
-        <a class="close" ng-click="message.close();" data-dismiss="alert" aria-hidden="true">&times;</a>\
+      <div id="{{ message.uid }}" class="alert alert-{{ message.type }} {{ animation }}" ng-repeat="message in mcMessages">\
+        <a class="close" ng-click="remove(message)" data-dismiss="alert" aria-hidden="true">&times;</a>\
         <span ng-switch on="message.html">\
         <span ng-switch-when="true">\
           <span ng-bind-html="message.message"></span>\
@@ -111,7 +112,10 @@ MessageCenterModule.
           messageCenterService.flush();
         };
         $rootScope.$on('$locationChangeStart', changeReaction);
-
+        scope.remove = function(message) {
+          document.getElementById(message.uid).remove();
+          message.close();
+        }
         scope.animation = attrs.animation || 'fade in';
       }
     };
